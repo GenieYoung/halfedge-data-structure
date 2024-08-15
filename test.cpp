@@ -3,6 +3,7 @@
 
 void build_cube()
 {
+    // you can use your own point instead array by override the default traits
     halfedge::Graph<> g;
     halfedge::VertexHandle v0 = g.add_vertex({0,0,0});
     halfedge::VertexHandle v1 = g.add_vertex({1,0,0});
@@ -28,8 +29,30 @@ void read_obj()
     g.write_obj("leaf_after_read.obj");
 }
 
+void smooth()
+{
+    // an example of iterator, the algorithm itself should be modified
+    halfedge::Graph<> g;
+    g.read_obj("leaf.obj");
+    for(auto vit = g.vertices_begin(); vit != g.vertices_end(); ++vit)
+    {
+        double x_sum = 0, y_sum = 0, z_sum = 0;
+        unsigned valence = 0;
+        for(auto vvit = g.vv_begin(*vit); vvit != g.vv_end(*vit); ++vvit)
+        {
+            x_sum += g.point(*vvit)[0];
+            y_sum += g.point(*vvit)[1];
+            z_sum += g.point(*vvit)[2];
+            ++valence;
+        }
+        g.point(*vit) = {x_sum/valence, y_sum/valence, z_sum/valence};
+    }
+    g.write_obj("leaf_after_smooth.obj");
+}
+
 int main()
 {
     build_cube();
     read_obj();
+    smooth();
 }
